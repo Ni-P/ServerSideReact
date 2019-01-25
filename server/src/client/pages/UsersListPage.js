@@ -14,7 +14,11 @@ class UsersList extends Component {
   }
 
   render() {
-    return <div>Hers's a list of users:{this.renderUsers()}</div>;
+    return (
+      <div>
+        Heres's a list of users:<ul>{this.renderUsers()}</ul>
+      </div>
+    );
   }
 }
 
@@ -24,7 +28,17 @@ function mapStateToProps(state) {
   };
 }
 
-export default connect(
-  mapStateToProps,
-  { fetchUsers }
-)(UsersList);
+function loadData(store) {
+  console.log('loading data...');
+  return store.dispatch(fetchUsers());
+}
+
+export { loadData };
+
+export default {
+  loadData,
+  component: connect(
+    mapStateToProps,
+    { fetchUsers }
+  )(UsersList)
+};
