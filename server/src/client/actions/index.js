@@ -4,8 +4,6 @@ export const FETCH_USERS = 'fetch_users';
 export const fetchUsers = () => async (dispatch, getState, api) => {
   const res = await api.get('/users');
 
-  console.log('dispatching fetchUsers');
-
   dispatch({
     type: FETCH_USERS,
     payload: res
@@ -25,8 +23,6 @@ export const fetchCurrentUser = () => async (dispatch, getState, api) => {
 export const FETCH_ADMINS = 'fetch_admins';
 export const fetchAdmins = () => async (dispatch, getState, api) => {
   const res = await api.get('/admins');
-
-  console.log('dispatching fetchAdmins');
 
   dispatch({
     type: FETCH_ADMINS,

@@ -101,14 +101,12 @@ var fetchUsers = exports.fetchUsers = function fetchUsers() {
               res = _context.sent;
 
 
-              console.log('dispatching fetchUsers');
-
               dispatch({
                 type: FETCH_USERS,
                 payload: res
               });
 
-            case 5:
+            case 4:
             case 'end':
               return _context.stop();
           }
@@ -173,14 +171,12 @@ var fetchAdmins = exports.fetchAdmins = function fetchAdmins() {
               res = _context3.sent;
 
 
-              console.log('dispatching fetchAdmins');
-
               dispatch({
                 type: FETCH_ADMINS,
                 payload: res
               });
 
-            case 5:
+            case 4:
             case 'end':
               return _context3.stop();
           }
@@ -264,15 +260,6 @@ exports.default = [_extends({}, _App2.default, {
   }), _extends({}, _NotFoundPage2.default)]
 })];
 
-// export default () => {
-//   return (
-//     <div>
-//       <Route exact path="/" component={Home} />
-//       <Route path="/users" component={usersList} />
-//     </div>
-//   );
-// };
-
 /***/ }),
 /* 6 */
 /***/ (function(module, exports) {
@@ -314,8 +301,6 @@ var _path = __webpack_require__(28);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-//import { loadData } from './client/components/UsersList';
-
 var app = (0, _express2.default)();
 
 app.use('/api', (0, _expressHttpProxy2.default)('http://react-ssr-api.herokuapp.com', {
@@ -326,7 +311,6 @@ app.use('/api', (0, _expressHttpProxy2.default)('http://react-ssr-api.herokuapp.
 }));
 
 app.use(_express2.default.static('public'));
-
 app.get('*', function (req, res) {
   var store = (0, _createStore2.default)(req);
 
@@ -337,12 +321,11 @@ app.get('*', function (req, res) {
   }).map(function (promise) {
     if (promise) {
       return new Promise(function (resolve, reject) {
-        promise.then(resolve).catch(reject);
+        promise.then(resolve).catch(resolve);
       });
     }
   });
 
-  // res.send(renderer(req, store));
   Promise.all(promises).then(function () {
     var context = {};
     var content = (0, _renderer2.default)(req, store, context);
@@ -352,18 +335,9 @@ app.get('*', function (req, res) {
 
     res.send(content);
   });
-  // .catch(() => {
-  //   const context = {};
-  //   const content = renderer(req, store, context);
-
-  //   if (context.url) return res.redirect(301, context.url);
-  //   if (content.notFound) res.status(404);
-
-  //   res.send(content);
-  // });
 });
 app.listen(3000, function () {
-  console.log('listening at port 3000');
+  console.log('server listening at port 3000');
 });
 
 /***/ }),
@@ -415,12 +389,13 @@ var _serializeJavascript = __webpack_require__(20);
 
 var _serializeJavascript2 = _interopRequireDefault(_serializeJavascript);
 
+var _reactHelmet = __webpack_require__(29);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
-// XSS protection
-
+// import Home from '../client/pages/HomePage';
 exports.default = function (req, store, context) {
   var content = (0, _server.renderToString)(React.createElement(
     _reactRedux.Provider,
@@ -436,9 +411,10 @@ exports.default = function (req, store, context) {
     )
   ));
 
-  return '\n    <html>\n        <head>\n          <!-- Compiled and minified CSS -->\n          <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">\n        </head>\n        <body>\n            <div id="root">' + content + '</div>\n            <script>\n              window.INITIAL_STATE = ' + (0, _serializeJavascript2.default)(store.getState()) + '\n            </script>\n            <script src="bundle.js"></script>\n        </body>\n    </html>\n  ';
-};
-// import Home from '../client/pages/HomePage';
+  var helmet = _reactHelmet.Helmet.renderStatic();
+
+  return '\n    <html>\n        <head>\n        ' + helmet.title.toString() + '\n        ' + helmet.meta.toString() + '\n        <!-- Compiled and minified CSS -->\n          <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">\n          </head>\n        <body>\n            <div id="root">' + content + '</div>\n            <script>\n              window.INITIAL_STATE = ' + (0, _serializeJavascript2.default)(store.getState()) + '\n            </script>\n            <script src="bundle.js"></script>\n        </body>\n    </html>\n  ';
+}; // XSS protection
 
 /***/ }),
 /* 12 */
@@ -502,6 +478,8 @@ var _reactRedux = __webpack_require__(2);
 
 var _actions = __webpack_require__(1);
 
+var _reactHelmet = __webpack_require__(29);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -536,11 +514,26 @@ var UsersListPage = function (_Component) {
       });
     }
   }, {
+    key: 'head',
+    value: function head() {
+      return _react2.default.createElement(
+        _reactHelmet.Helmet,
+        null,
+        _react2.default.createElement(
+          'title',
+          null,
+          this.props.users.length + ' users loaded'
+        ),
+        _react2.default.createElement('meta', { property: 'og:title', content: 'Users App' })
+      );
+    }
+  }, {
     key: 'render',
     value: function render() {
       return _react2.default.createElement(
         'div',
         null,
+        this.head(),
         'Heres\'s a list of users:',
         _react2.default.createElement(
           'ul',
@@ -815,13 +808,6 @@ function mapStateToProps(_ref) {
   return { admins: admins };
 }
 
-// function loadData(store) {
-//   console.log('loading data...');
-//   return store.dispatch(fetchAdmins());
-// }
-
-// export { loadData };
-
 exports.default = {
   component: (0, _reactRedux.connect)(mapStateToProps, { fetchAdmins: _actions.fetchAdmins })((0, _requireAuth2.default)(AdminsListPage)),
   loadData: function loadData(_ref2) {
@@ -1009,8 +995,6 @@ exports.default = function () {
 
   switch (action.type) {
     case _actions.FETCH_USERS:
-      console.log('fetching users');
-
       return action.payload.data;
     default:
       return state;
@@ -1072,6 +1056,12 @@ var _actions = __webpack_require__(1);
 /***/ (function(module, exports) {
 
 module.exports = require("path");
+
+/***/ }),
+/* 29 */
+/***/ (function(module, exports) {
+
+module.exports = require("react-helmet");
 
 /***/ })
 /******/ ]);

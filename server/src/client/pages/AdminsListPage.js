@@ -27,13 +27,6 @@ function mapStateToProps({ admins }) {
   return { admins };
 }
 
-// function loadData(store) {
-//   console.log('loading data...');
-//   return store.dispatch(fetchAdmins());
-// }
-
-// export { loadData };
-
 export default {
   component: connect(
     mapStateToProps,
