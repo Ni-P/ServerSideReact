@@ -5,6 +5,7 @@ import renderer from './helpers/renderer';
 import createStore from './helpers/createStore';
 import { matchRoutes } from 'react-router-config';
 import Routes from './client/Routes';
+import { resolve } from 'path';
 //import { loadData } from './client/components/UsersList';
 
 const app = express();
@@ -24,16 +25,38 @@ app.use(express.static('public'));
 app.get('*', (req, res) => {
   const store = createStore(req);
 
-  const promises = matchRoutes(Routes, req.path).map(({ route }) => {
-    return route.loadData ? route.loadData(store) : null;
-  });
-  Promise.all(promises).then(() => {
-    res.send(renderer(req, store));
-  });
+  const promises = matchRoutes(Routes, req.path)
+    .map(({ route }) => {
+      return route.loadData ? route.loadData(store) : null;
+    })
+    .map(promise => {
+      if (promise) {
+        return new Promise((resolve, reject) => {
+          promise.then(resolve).catch(reject);
+        });
+      }
+    });
 
   // res.send(renderer(req, store));
-});
+  Promise.all(promises).then(() => {
+    const context = {};
+    const content = renderer(req, store, context);
 
+    if (context.url) return res.redirect(301, context.url);
+    if (content.notFound) res.status(404);
+
+    res.send(content);
+  });
+  // .catch(() => {
+  //   const context = {};
+  //   const content = renderer(req, store, context);
+
+  //   if (context.url) return res.redirect(301, context.url);
+  //   if (content.notFound) res.status(404);
+
+  //   res.send(content);
+  // });
+});
 app.listen(3000, () => {
   console.log('listening at port 3000');
 });
